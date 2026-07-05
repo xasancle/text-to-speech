@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>Minimal TTS</title>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -17,7 +17,7 @@
             --input-bg: #1e1e1e; --border-color: #333333; 
         }
         
-        body { margin: 0; padding: 0; background-color: var(--bg-color); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        body { margin: 0; padding: 0; background-color: var(--bg-color); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
         
         textarea { 
             flex-grow: 1; width: 100vw; 
@@ -37,10 +37,8 @@
             background: var(--text-color); color: var(--bg-color); padding: 5px 10px; border-radius: 4px; 
             font-size: 11px; font-weight: 600; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.15s; z-index: 1000;
         }
-        /* Main bar tooltip goes UP. Above bars tooltip goes DOWN */
         #mainBar button[data-tooltip]::before { bottom: 115%; top: auto; }
         .bar:not(#mainBar) button[data-tooltip]::before { top: 115%; bottom: auto; }
-        
         button[data-tooltip].tooltip-visible::before { opacity: 1; }
         button:active { background: var(--border-color); }
         svg { width: 22px; height: 22px; fill: var(--text-color); }
@@ -49,22 +47,22 @@
         .popup-menu { display: none; position: absolute; background: var(--input-bg); color: var(--text-color); border: 1px solid var(--text-color); border-radius: 8px; box-shadow: 0 -4px 10px rgba(0,0,0,0.25); z-index: 20; }
         .popup-menu.show { display: flex; }
         
-        /* Exactly no space above settings bar */
-        #audioPopup, #counterPopup, #voicePopup { bottom: 120px; flex-direction: column; align-items: stretch; border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: none; }
+        #audioPopup, #counterPopup, #voicePopup, #pauseLinePopup, #pauseCommaPopup, #pauseDotPopup { bottom: 120px; flex-direction: column; align-items: stretch; border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: none; }
         
-        /* Audio Controls */
-        #audioPopup { padding: 10px 15px; gap: 10px; }
-        .control-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0 5px; }
+        /* General Control Styling */
+        .control-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0 5px; padding: 10px 15px; }
+        #audioPopup { padding: 5px 0; gap: 5px; }
         .control-buttons { display: flex; align-items: center; gap: 8px; }
-        .label-text { font-size: 10px; font-weight: 600; opacity: 0.8; letter-spacing: 0.5px; }
+        .label-text { font-size: 10px; font-weight: 600; opacity: 0.8; letter-spacing: 0.5px; margin-top: 2px; }
         .num-btn { font-weight: bold; font-size: 16px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: var(--border-color); border-radius: 50%; opacity: 0.9; padding: 0; color: var(--text-color); }
         .val-span { cursor: pointer; min-width: 40px; text-align: center; font-size: 14px; font-weight: 500; }
         
-        /* Spreadsheet Count Dropup (2 columns) */
+        /* Spreadsheet Count Dropup */
         #counterPopup { padding: 0; border-collapse: collapse; min-width: 170px; overflow: hidden; }
         .counter-row { display: flex; font-size: 13px; }
-        .counter-cell { border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); padding: 8px 12px; flex: 1; text-align: left; }
-        .counter-cell.val { font-weight: bold; border-right: none; text-align: right; }
+        .counter-cell { border-bottom: 1px solid var(--border-color); padding: 8px 12px; flex: 1; }
+        .counter-cell.val { font-weight: bold; border-right: 1px solid var(--border-color); text-align: left; }
+        .counter-cell.txt { text-align: right; }
         .counter-row:last-child .counter-cell { border-bottom: none; }
         
         /* Voice Dropup */
@@ -72,6 +70,10 @@
         .voice-btn { width: 100%; text-align: left; padding: 12px 15px; border-radius: 0; font-size: 13px; font-weight: 600; color: var(--text-color); background: var(--input-bg); border-bottom: 1px solid var(--border-color); cursor: pointer; }
         .voice-btn:hover { background: var(--border-color); }
         .voice-btn:last-child { border-bottom: none; }
+
+        /* Text Buttons */
+        .txt-btn { font-size: 13px; font-weight: 600; padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: transparent; color: var(--text-color); cursor: pointer; }
+        .txt-btn:active { background: var(--border-color); }
 
         /* Dynamic Tabs */
         .tabs-wrapper { display: flex; height: 100%; flex-grow: 1; border-left: 1px solid var(--border-color); margin-left: auto; overflow-x: auto; scrollbar-width: none; }
@@ -89,11 +91,11 @@
         .add-tab-btn { min-width: 50px; height: 100%; border: none; background: transparent; color: var(--text-color); font-size: 20px; font-weight: 300; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .add-tab-btn:active { background: var(--border-color); }
 
-        /* Search input styling */
+        /* Search input */
         #searchInput { flex-grow: 1; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-color); padding: 6px 10px; border-radius: 4px; outline: none; font-size: 14px; min-width: 0; }
 
         /* Loader */
-        .loader-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 100; flex-direction: column; justify-content: center; align-items: center; color: #ffffff; text-align: center; }
+        .loader-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.85); z-index: 100; flex-direction: column; justify-content: center; align-items: center; color: #ffffff; text-align: center; }
         .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: #ffffff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -121,12 +123,11 @@
             <button onclick="toggleMainBar('searchBar')" data-tooltip="Search">
                 <span style="transform: scaleX(-1); display: flex;"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
             </button>
-            <button id="playBtn" onmousedown="event.preventDefault(); toggleSpeech()" data-tooltip="Play/Pause">
+            <button id="playBtn" onclick="toggleSpeech()" data-tooltip="Play/Pause">
                 <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             </button>
             
-            <div class="tabs-wrapper" id="tabsWrapper">
-                </div>
+            <div class="tabs-wrapper" id="tabsWrapper"></div>
         </div>
 
         <div id="editBar" class="bar" style="display:none;">
@@ -160,36 +161,65 @@
             <button onclick="togglePopup('audioPopup', this)" data-tooltip="Audio Control">
                 <svg viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
             </button>
+            <button onclick="togglePunctuationBar()" data-tooltip="Punctuation">
+                <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+            </button>
         </div>
 
         <div id="appearanceBar" class="bar" style="display:none;">
             <button onclick="toggleTheme()" data-tooltip="Toggle Theme"><svg viewBox="0 0 24 24"><path d="M12 2v20c5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg></button>
         </div>
 
+        <div id="punctuationBar" class="bar" style="display:none;">
+            <button class="txt-btn" onclick="togglePopup('pauseLinePopup', this)" data-tooltip="Paragraph Pause">Line</button>
+            <button class="txt-btn" onclick="togglePopup('pauseCommaPopup', this)" data-tooltip="Comma Pause">Comma</button>
+            <button class="txt-btn" onclick="togglePopup('pauseDotPopup', this)" data-tooltip="Dot Pause">Dot</button>
+        </div>
+
+    </div>
+
+    <div id="pauseLinePopup" class="popup-menu">
+        <div class="control-wrapper"><div class="control-buttons"><button class="num-btn" onclick="adjPause('line', -100)">-</button><span class="val-span" id="valPauseLine" ondblclick="resetPause('line')">1000</span><button class="num-btn" onclick="adjPause('line', 100)">+</button></div><span class="label-text">MS</span></div>
+    </div>
+    <div id="pauseCommaPopup" class="popup-menu">
+        <div class="control-wrapper"><div class="control-buttons"><button class="num-btn" onclick="adjPause('comma', -50)">-</button><span class="val-span" id="valPauseComma" ondblclick="resetPause('comma')">200</span><button class="num-btn" onclick="adjPause('comma', 50)">+</button></div><span class="label-text">MS</span></div>
+    </div>
+    <div id="pauseDotPopup" class="popup-menu">
+        <div class="control-wrapper"><div class="control-buttons"><button class="num-btn" onclick="adjPause('dot', -50)">-</button><span class="val-span" id="valPauseDot" ondblclick="resetPause('dot')">400</span><button class="num-btn" onclick="adjPause('dot', 50)">+</button></div><span class="label-text">MS</span></div>
     </div>
 
     <div id="counterPopup" class="popup-menu">
         <div class="counter-row">
-            <div class="counter-cell">Time</div><div class="counter-cell val" id="timeCountDisplay">0m 0s</div>
+            <div class="counter-cell val" id="timeCountDisplay">0m 0s</div><div class="counter-cell txt">Time</div>
         </div>
         <div class="counter-row">
-            <div class="counter-cell">Character</div><div class="counter-cell val" id="charCountDisplay">0</div>
+            <div class="counter-cell val" id="charCountDisplay">0</div><div class="counter-cell txt">Character</div>
         </div>
         <div class="counter-row">
-            <div class="counter-cell">Line</div><div class="counter-cell val" id="lineCountDisplay">1</div>
+            <div class="counter-cell val" id="lineCountDisplay">1</div><div class="counter-cell txt">Line</div>
         </div>
     </div>
 
     <div id="voicePopup" class="popup-menu"></div>
 
     <div id="audioPopup" class="popup-menu">
-        <div class="control-wrapper"><span class="label-text">PITCH</span><div class="control-buttons"><button class="num-btn" onclick="adj('pitch', -0.05)">-</button><span class="val-span" id="valPitch" ondblclick="resetVal('pitch')">1.00</span><button class="num-btn" onclick="adj('pitch', 0.05)">+</button></div></div>
-        <div class="control-wrapper"><span class="label-text">SPEED</span><div class="control-buttons"><button class="num-btn" onclick="adj('rate', -0.05)">-</button><span class="val-span" id="valRate" ondblclick="resetVal('rate')">0.85</span><button class="num-btn" onclick="adj('rate', 0.05)">+</button></div></div>
-        <div class="control-wrapper"><span class="label-text">VOLUME</span><div class="control-buttons"><button class="num-btn" onclick="adj('vol', -0.05)">-</button><span class="val-span" id="valVol" ondblclick="resetVal('vol')">1.00</span><button class="num-btn" onclick="adj('vol', 0.05)">+</button></div></div>
+        <div class="control-wrapper">
+            <div class="control-buttons"><button class="num-btn" onclick="adj('pitch', -0.05)">-</button><span class="val-span" id="valPitch" ondblclick="resetVal('pitch')">1.00</span><button class="num-btn" onclick="adj('pitch', 0.05)">+</button></div>
+            <span class="label-text">PITCH</span>
+        </div>
+        <div class="control-wrapper">
+            <div class="control-buttons"><button class="num-btn" onclick="adj('rate', -0.05)">-</button><span class="val-span" id="valRate" ondblclick="resetVal('rate')">0.85</span><button class="num-btn" onclick="adj('rate', 0.05)">+</button></div>
+            <span class="label-text">SPEED</span>
+        </div>
+        <div class="control-wrapper">
+            <div class="control-buttons"><button class="num-btn" onclick="adj('vol', -0.05)">-</button><span class="val-span" id="valVol" ondblclick="resetVal('vol')">1.00</span><button class="num-btn" onclick="adj('vol', 0.05)">+</button></div>
+            <span class="label-text">VOLUME</span>
+        </div>
     </div>
 
     <script>
         let rate = 0.85, pitch = 1.0, vol = 1.0, selectedVoiceName = "";
+        let pauseLine = 1000, pauseComma = 200, pauseDot = 400;
         let textChunks = [], currentChunkIndex = 0, isPlaying = false, isPaused = false;
         
         const input = document.getElementById('textInput');
@@ -197,7 +227,52 @@
         const synth = window.speechSynthesis;
         const playPath = "M8 5v14l11-7z", pausePath = "M6 19h4V5H6v14zm8-14v14h4V5h-4z";
 
-        // --- Tooltips Logic (Hold to show, Release to hide) ---
+        // --- Background Notification Media Session Setup ---
+        const silentAudio = new Audio('data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU2LjM2LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIADBwsPEx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcH/////////8AAABHTEFNRTMuOThyA7oAAAAAAAAAADQgJDFiTQABAAABIAAAAAAAAAAA//OEABAAAAAAgAAAAAAAADxIQQkIADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAAD//OEABAAAAAAgAAAAAAAADxIQQkIADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAAD//OEABAAAAAAgAAAAAAAADxIQQkIADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAADzZAAAAAABAAAD');
+        silentAudio.loop = true;
+        let audioUnlocked = false;
+
+        // Unlock audio context on the absolute first touch event globally so the device allows it
+        function unlockAudio() {
+            if (!audioUnlocked) {
+                silentAudio.play().then(() => {
+                    silentAudio.pause();
+                    silentAudio.currentTime = 0;
+                    audioUnlocked = true;
+                }).catch(() => {});
+                document.removeEventListener('touchstart', unlockAudio);
+                document.removeEventListener('click', unlockAudio);
+            }
+        }
+        document.addEventListener('touchstart', unlockAudio, { once: true });
+        document.addEventListener('click', unlockAudio, { once: true });
+
+        function updateMediaSession(state) {
+            if ('mediaSession' in navigator) {
+                let tabName = tabs.find(t => t.id === activeTabId)?.name || 'Minimal TTS';
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: tabName,
+                    artist: state === 'Playing' ? 'Reading Text...' : 'Paused',
+                });
+                navigator.mediaSession.playbackState = state === 'Playing' ? 'playing' : 'paused';
+            }
+        }
+
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', () => { if (isPaused) toggleSpeech(); });
+            navigator.mediaSession.setActionHandler('pause', () => { if (isPlaying && !isPaused) toggleSpeech(); });
+            navigator.mediaSession.setActionHandler('stop', () => { if (isPlaying) stopSpeech(); });
+        }
+
+        // Keyboard Viewport Adaptability Fix
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                document.body.style.height = window.visualViewport.height + 'px';
+                window.scrollTo(0, 0);
+            });
+        }
+
+        // --- Tooltips Logic ---
         function initTooltips() {
             document.querySelectorAll('button[data-tooltip]').forEach(btn => {
                 const show = () => btn.classList.add('tooltip-visible');
@@ -208,7 +283,7 @@
         }
         initTooltips();
 
-        // --- UI Navigation: Close any other bar on click ---
+        // --- UI Navigation ---
         function closeAllPopups() { document.querySelectorAll('.popup-menu').forEach(p => p.classList.remove('show')); }
 
         function toggleMainBar(barId) {
@@ -220,14 +295,23 @@
             document.getElementById('editBar').style.display = 'none';
             document.getElementById('settingsBar').style.display = 'none';
             document.getElementById('appearanceBar').style.display = 'none';
+            document.getElementById('punctuationBar').style.display = 'none';
             
             if (!isCurrentlyOpen) bar.style.display = 'flex';
         }
 
         function toggleAppearanceBar() {
             closeAllPopups();
+            document.getElementById('punctuationBar').style.display = 'none';
             const aBar = document.getElementById('appearanceBar');
             aBar.style.display = (aBar.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function togglePunctuationBar() {
+            closeAllPopups();
+            document.getElementById('appearanceBar').style.display = 'none';
+            const pBar = document.getElementById('punctuationBar');
+            pBar.style.display = (pBar.style.display === 'flex') ? 'none' : 'flex';
         }
 
         function togglePopup(id, btnElement) {
@@ -243,7 +327,7 @@
             }
         }
 
-        // --- Autosave & Dynamic Tabs Engine ---
+        // --- Autosave & Dynamic Tabs ---
         let tabs = JSON.parse(localStorage.getItem('tts_tabs')) || [{ id: Date.now(), name: "File 1.txt", content: "" }];
         let activeTabId = parseInt(localStorage.getItem('tts_active_tab')) || tabs[0].id;
         let tabHistory = {};
@@ -262,9 +346,7 @@
             wrapper.innerHTML = '';
             tabs.forEach(tab => {
                 initTabHistory(tab.id);
-                if (tab.id === activeTabId && tabHistory[tab.id].stack[0] === '') {
-                    tabHistory[tab.id].stack[0] = tab.content;
-                }
+                if (tab.id === activeTabId && tabHistory[tab.id].stack[0] === '') tabHistory[tab.id].stack[0] = tab.content;
                 
                 const btn = document.createElement('button');
                 btn.className = `tab-btn ${tab.id === activeTabId ? 'active' : ''}`;
@@ -401,9 +483,17 @@
             if(localStorage.getItem('tts_vol')) { vol = parseFloat(localStorage.getItem('tts_vol')); document.getElementById('valVol').textContent = vol.toFixed(2); }
             if(localStorage.getItem('tts_dark') === 'false') { document.body.classList.remove('dark-mode'); }
             
+            if(localStorage.getItem('tts_pauseLine')) { pauseLine = parseInt(localStorage.getItem('tts_pauseLine')); document.getElementById('valPauseLine').textContent = pauseLine; }
+            if(localStorage.getItem('tts_pauseComma')) { pauseComma = parseInt(localStorage.getItem('tts_pauseComma')); document.getElementById('valPauseComma').textContent = pauseComma; }
+            if(localStorage.getItem('tts_pauseDot')) { pauseDot = parseInt(localStorage.getItem('tts_pauseDot')); document.getElementById('valPauseDot').textContent = pauseDot; }
+            
             renderTabs(); updateCharCount();
         }
-        function resetLS() { localStorage.clear(); location.reload(); }
+        
+        function resetLS() { 
+            if (!confirm("Are you sure you want to delete all settings and local storage?")) return;
+            localStorage.clear(); location.reload(); 
+        }
 
         function toggleTheme() { document.body.classList.toggle('dark-mode'); localStorage.setItem('tts_dark', document.body.classList.contains('dark-mode')); }
         
@@ -414,9 +504,10 @@
             const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
             const totalSecs = Math.round((wordCount / 150) * 60);
             document.getElementById('timeCountDisplay').textContent = `${Math.floor(totalSecs / 60)}m ${totalSecs % 60}s`; 
+            saveTabs();
         }
 
-        // --- Audio Controls ---
+        // --- Audio & Punctuation Controls ---
         function adj(type, val) { 
             if (type === 'rate') { rate = Math.max(0.5, Math.min(2, rate + val)); document.getElementById('valRate').textContent = rate.toFixed(2); localStorage.setItem('tts_rate', rate); } 
             else if (type === 'pitch') { pitch = Math.max(0, Math.min(2, pitch + val)); document.getElementById('valPitch').textContent = pitch.toFixed(2); localStorage.setItem('tts_pitch', pitch); }
@@ -428,7 +519,18 @@
             else { vol = 1.00; document.getElementById('valVol').textContent = "1.00"; localStorage.setItem('tts_vol', vol); }
         }
 
-        // --- Speech Engine ---
+        function adjPause(type, val) {
+            if(type==='line') { pauseLine = Math.max(0, pauseLine + val); document.getElementById('valPauseLine').textContent = pauseLine; localStorage.setItem('tts_pauseLine', pauseLine); }
+            else if(type==='comma') { pauseComma = Math.max(0, pauseComma + val); document.getElementById('valPauseComma').textContent = pauseComma; localStorage.setItem('tts_pauseComma', pauseComma); }
+            else if(type==='dot') { pauseDot = Math.max(0, pauseDot + val); document.getElementById('valPauseDot').textContent = pauseDot; localStorage.setItem('tts_pauseDot', pauseDot); }
+        }
+        function resetPause(type) {
+            if(type==='line') { pauseLine = 1000; document.getElementById('valPauseLine').textContent = "1000"; localStorage.setItem('tts_pauseLine', 1000); }
+            else if(type==='comma') { pauseComma = 200; document.getElementById('valPauseComma').textContent = "200"; localStorage.setItem('tts_pauseComma', 200); }
+            else if(type==='dot') { pauseDot = 400; document.getElementById('valPauseDot').textContent = "400"; localStorage.setItem('tts_pauseDot', 400); }
+        }
+
+        // --- Punctuation-Aware Speech Engine ---
         function buildChunks(text, startIndex = 0) {
             const MAX_LEN = 150; let chunks = []; let current = startIndex;
             while (current < text.length) {
@@ -436,9 +538,10 @@
                 if (chunkEnd >= text.length) chunkEnd = text.length;
                 else {
                     let segment = text.substring(current, chunkEnd);
-                    let breakPoint = segment.search(/[.!?\n;](?!.*\w)/);
-                    if (breakPoint !== -1) chunkEnd = current + breakPoint + 1;
-                    else {
+                    let match = segment.match(/.*(\n{2,}|\.\s|\?\s|!\s|,\s)/);
+                    if (match) {
+                        chunkEnd = current + match[0].length;
+                    } else {
                         let spacePoint = segment.lastIndexOf(" ");
                         if (spacePoint !== -1) chunkEnd = current + spacePoint + 1;
                     }
@@ -452,11 +555,26 @@
         function toggleSpeech() {
             closeAllPopups();
             if (isPlaying) {
-                if (!isPaused) { isPaused = true; synth.cancel(); iconPath.innerHTML = `<path d="${playPath}"/>`; } 
-                else { isPaused = false; playCurrentChunk(); iconPath.innerHTML = `<path d="${pausePath}"/>`; }
+                if (!isPaused) { 
+                    isPaused = true; 
+                    synth.cancel(); 
+                    silentAudio.pause(); 
+                    iconPath.innerHTML = `<path d="${playPath}"/>`; 
+                    updateMediaSession('Paused');
+                } else { 
+                    isPaused = false; 
+                    silentAudio.play().catch(() => console.log('Audio Autoplay Blocked'));
+                    playCurrentChunk(); 
+                    iconPath.innerHTML = `<path d="${pausePath}"/>`; 
+                    updateMediaSession('Playing');
+                }
             } else {
                 const text = input.value; if (!text.trim()) return;
                 if (input.selectionStart === text.length && text.length > 0) input.setSelectionRange(0, 0);
+
+                // Play silent audio immediately on button click to trigger media session correctly
+                silentAudio.play().catch(() => console.log('Audio Autoplay Blocked'));
+                updateMediaSession('Playing');
 
                 const wordCount = text.substring(input.selectionStart).trim().split(/\s+/).filter(Boolean).length;
                 const totalSecs = Math.round((wordCount / 150) * 60);
@@ -477,7 +595,7 @@
                         isPlaying = true; isPaused = false;
                         synth.cancel(); playCurrentChunk();
                         iconPath.innerHTML = `<path d="${pausePath}"/>`;
-                    }, 3000);
+                    }, 2000); 
                     
                 }, 100);
             }
@@ -487,18 +605,36 @@
             if (currentChunkIndex >= textChunks.length) { stopSpeech(); input.setSelectionRange(input.value.length, input.value.length); return; }
             
             let chunk = textChunks[currentChunkIndex];
-            let u = new SpeechSynthesisUtterance(chunk.text);
+            let cleanText = chunk.text.replace(/([^\n])\n([^\n])/g, '$1 $2').replace(/\n+/g, ' ');
+            let u = new SpeechSynthesisUtterance(cleanText);
             
             u.rate = rate; u.pitch = pitch; u.volume = vol;
             if (selectedVoiceName) u.voice = synth.getVoices().find(v => v.name === selectedVoiceName);
             
-            u.onend = () => { if (isPlaying && !isPaused) { currentChunkIndex++; playCurrentChunk(); } };
+            u.onend = () => { 
+                if (isPlaying && !isPaused) { 
+                    currentChunkIndex++; 
+                    let delay = 0;
+                    if (chunk.text.match(/\n{2,}\s*$/)) delay = pauseLine;
+                    else if (chunk.text.match(/,\s*$/)) delay = pauseComma;
+                    else if (chunk.text.match(/[.!?]\s*$/)) delay = pauseDot;
+                    
+                    if (delay > 0) setTimeout(() => playCurrentChunk(), delay);
+                    else playCurrentChunk(); 
+                } 
+            };
             u.onerror = (e) => { if (e.error !== 'canceled' && isPlaying && !isPaused) { currentChunkIndex++; playCurrentChunk(); } };
 
             synth.speak(u);
         }
 
-        function stopSpeech() { isPlaying = false; isPaused = false; synth.cancel(); iconPath.innerHTML = `<path d="${playPath}"/>`; }
+        function stopSpeech() { 
+            isPlaying = false; isPaused = false; synth.cancel(); 
+            iconPath.innerHTML = `<path d="${playPath}"/>`; 
+            silentAudio.pause(); 
+            silentAudio.currentTime = 0;
+            updateMediaSession('Paused');
+        }
         
         function handleUserInteraction() { if (isPlaying) stopSpeech(); closeAllPopups(); }
         input.addEventListener('click', handleUserInteraction);
